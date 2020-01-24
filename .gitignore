@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Others (defined by me)
+tiff-4.1.0/
+*.bat

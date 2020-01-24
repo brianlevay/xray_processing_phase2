@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include "tiff-4.1.0/libtiff/tiffio.h"
 
 int main()
 {
