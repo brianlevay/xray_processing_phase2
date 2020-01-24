@@ -26,7 +26,7 @@ double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, st
 	
 	data_limits = new double[2];
 	
-	hist_freq = new double[nbins];
+	hist_freq = new double[nbins]();
 	if (!hist_freq)
 	{
 		recordError(errors, "Unable to allocate memory for hist_freq.\n");
