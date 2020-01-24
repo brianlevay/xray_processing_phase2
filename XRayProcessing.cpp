@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	if (errors.iserror == 1)
 	{
 		std::cout << errors.error;
-		freePixeldata(pixeldata, 1);
+		freeJaggedArray(pixeldata, 1);
 		return 0;
 	}
 
@@ -37,8 +37,8 @@ int main(int argc, char* argv[])
 	if (errors.iserror == 1)
 	{
 		std::cout << errors.error;
-		freeCalcdata(calcdata, 1);
-		freePixeldata(pixeldata, meta.nrows);
+		freeJaggedArray(calcdata, 1);
+		freeJaggedArray(pixeldata, meta.nrows);
 		return 0;
 	}
 
@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
 	//if (errors.iserror == 1)
 	//{
 	//	printf(errors.error);
-	//	free_calcdata(calcdata, meta.nrows);
-	//	free_pixeldata(pixeldata, meta.nrows);
+	//	freeJaggedArray(calcdata, meta.nrows);
+	//	freeJaggedArray(pixeldata, meta.nrows);
 	//	return 0;
 	//}
 
@@ -59,15 +59,15 @@ int main(int argc, char* argv[])
 	if (errors.iserror == 1)
 	{
 		std::cout << errors.error;
-		freeCalcdata(calcdata, meta.nrows);
-		freePixeldata(pixeldata, meta.nrows);
+		freeJaggedArray(calcdata, meta.nrows);
+		freeJaggedArray(pixeldata, meta.nrows);
 		return 0;
 	}
 
 	writeTiff(pixeldata, outpath, &meta, &errors);
 
-	freeCalcdata(calcdata, meta.nrows);
-	freePixeldata(pixeldata, meta.nrows);
+	freeJaggedArray(calcdata, meta.nrows);
+	freeJaggedArray(pixeldata, meta.nrows);
 	if (errors.iserror == 1)
 	{
 		std::cout << errors.error;

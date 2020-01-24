@@ -29,7 +29,7 @@ void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMe
 	data_limits = calculatePixelLimits(pixeldata, meta, errors);
 	if ((*errors).iserror == 1)
 	{
-		free(data_limits);
+		delete[] data_limits;
 		return;
 	}
 	
@@ -37,11 +37,11 @@ void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMe
 	// Memory allocation and error handling 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	stretch_table = (uint16_t*) malloc((maxuint16 + 1) * sizeof(uint16_t));
+	stretch_table = new uint16_t[(maxuint16 + 1)];
 	if (!stretch_table)
 	{
 		recordError(errors, "Unable to allocate memory for stretch_table.\n");
-		free(data_limits);
+		delete[] data_limits;
 		return;
 	}
 	
@@ -83,7 +83,7 @@ void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMe
 	// Memory release
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	free(data_limits);
-	free(stretch_table);
+	delete[] data_limits;
+	delete[] stretch_table;
 	return;
 }

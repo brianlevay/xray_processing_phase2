@@ -24,9 +24,9 @@ double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, st
 	// Memory allocation and error handling 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	data_limits = (double*) malloc(2 * sizeof(double));
+	data_limits = new double[2];
 	
-	hist_freq = (double*) malloc(nbins * sizeof(double));
+	hist_freq = new double[nbins];
 	if (!hist_freq)
 	{
 		recordError(errors, "Unable to allocate memory for hist_freq.\n");
@@ -57,17 +57,17 @@ double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, st
 	
 	cumulative = 0.0;
 	data_limits[0] = 0.0;
-	data_limits[1] = (double)(nbins * bin_step - 1);
+	data_limits[1] = (double)nbins * (double)bin_step - 1.0;
 	for (n = 0; n < nbins; n++)
 	{
 		cumulative = cumulative + hist_freq[n];
 		if ((cumulative <= cumulative_min) && (hist_freq[n] <= freq_min))
 		{
-			data_limits[0] = (double)(n * bin_step);
+			data_limits[0] = (double)n * (double)bin_step;
 		}
 		if ((cumulative >= (1.0 - cumulative_min)) && (hist_freq[n] <= freq_min))
 		{
-			data_limits[1] = (double)(n * bin_step - 1);
+			data_limits[1] = (double)n * (double)bin_step - 1.0;
 			break;
 		}
 	}
@@ -81,6 +81,6 @@ double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, st
 	// Memory release
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	free(hist_freq);
+	delete[] hist_freq;
 	return data_limits;
 }

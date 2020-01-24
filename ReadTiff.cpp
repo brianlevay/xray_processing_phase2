@@ -7,13 +7,12 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 {
 	uint16_t pixelmax;
 	uint32_t i, j, nrows, ncols;
-	tsize_t scanlinesize;
 	int status;
 	uint16_t** pixeldata_empty;
 	uint16_t** pixeldata;
 	
-	pixeldata_empty = (uint16_t**) malloc(1 * sizeof(uint16_t*));
-	pixeldata_empty[0] = (uint16_t*) malloc(1 * sizeof(uint16_t));
+	pixeldata_empty = new uint16_t*[1];
+	pixeldata_empty[0] = new uint16_t[1];
 	
 	TIFF* tif_in = TIFFOpen(inpath,"r");
 	if (!tif_in) 
@@ -23,7 +22,7 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 	}
 	
 	TIFFGetFieldDefaulted(tif_in, TIFFTAG_IMAGEWIDTH, &(*meta).ncols);
-	TIFFGetFieldDefaulted(tif_in, TIFFTAG_IMAGELENGTH,&(*meta).nrows);
+	TIFFGetFieldDefaulted(tif_in, TIFFTAG_IMAGELENGTH, &(*meta).nrows);
 	TIFFGetFieldDefaulted(tif_in, TIFFTAG_SAMPLESPERPIXEL, &(*meta).samplesperpixel);
 	TIFFGetFieldDefaulted(tif_in, TIFFTAG_BITSPERSAMPLE, &(*meta).bitspersample);
 	TIFFGetFieldDefaulted(tif_in, TIFFTAG_ORIENTATION, &(*meta).orientation);
@@ -41,7 +40,7 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 	
 	nrows = (*meta).nrows;
 	ncols = (*meta).ncols;
-	pixeldata = (uint16_t**) malloc(nrows * sizeof(uint16_t*));
+	pixeldata = new uint16_t*[nrows];
 	if (!pixeldata)
 	{
 		recordError(errors, "Unable to allocate enough memory for the image array\n");
@@ -49,16 +48,15 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 		return pixeldata_empty;
 	}
 	
-	scanlinesize = (*meta).scanlinesize;
 	pixelmax = 0;
 	for (i = 0; i < nrows; i++) 
 	{
-		pixeldata[i] = (uint16_t*) malloc(scanlinesize);
+		pixeldata[i] = new uint16_t[ncols];
 		if (!pixeldata[i])
 		{
 			recordError(errors, "Unable to allocate enough memory for the image array\n");
 			TIFFClose(tif_in);
-			freePixeldata(pixeldata, i);
+			freeJaggedArray(pixeldata, i);
 			return pixeldata_empty;
 		}
 		status = TIFFReadScanline(tif_in, pixeldata[i], i, 0);
@@ -66,7 +64,7 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 		{
 			recordError(errors, "Unable to read data from image array\n");
 			TIFFClose(tif_in);
-			freePixeldata(pixeldata, i);
+			freeJaggedArray(pixeldata, i);
 			return pixeldata_empty;
 		}
 		for (j = 0; j < ncols; j++)
@@ -79,6 +77,6 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 	}
 	(*meta).pixelmax = pixelmax;
 	TIFFClose(tif_in);
-	freePixeldata(pixeldata_empty, 1);
+	freeJaggedArray(pixeldata_empty, 1);
 	return pixeldata;
 }

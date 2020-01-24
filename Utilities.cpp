@@ -3,25 +3,25 @@
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-void freePixeldata(uint16_t** pixeldata, uint32_t nrows)
+void freeJaggedArray(uint16_t** data, uint32_t nrows)
 {
 	uint32_t i;
 	for (i = 0; i < nrows; i++)
 	{
-		free(pixeldata[i]);
+		delete[] data[i];
 	}
-	free(pixeldata);
+	delete[] data;
 	return;
 }
 
-void freeCalcdata(double** calcdata, uint32_t nrows)
+void freeJaggedArray(double** data, uint32_t nrows)
 {
 	uint32_t i;
 	for (i = 0; i < nrows; i++)
 	{
-		free(calcdata[i]);
+		delete[] data[i];
 	}
-	free(calcdata);
+	delete[] data;
 	return;
 }
 

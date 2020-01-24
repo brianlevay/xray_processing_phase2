@@ -341,4 +341,5 @@ healthchecksdb
 
 # Others (defined by me)
 libtiff/
+images/
 *.bat

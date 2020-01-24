@@ -40,9 +40,9 @@ struct TiffMetadata
 /// Function declarations
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void freePixeldata(uint16_t** pixeldata, uint32_t nrows);
+void freeJaggedArray(uint16_t** pixeldata, uint32_t nrows);
 
-void freeCalcdata(double** calcdata, uint32_t nrows);
+void freeJaggedArray(double** calcdata, uint32_t nrows);
 
 void recordError(struct Errors* errors, const char* message);
 

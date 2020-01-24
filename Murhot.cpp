@@ -20,30 +20,30 @@ double** calculateMurhot(uint16_t** pixeldata, struct TiffMetadata* meta, struct
 	// Memory allocation and error handling 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	calcdata_empty = (double**) malloc(1 * sizeof(double*));
-	calcdata_empty[0] = (double*) malloc(1 * sizeof(double));
+	calcdata_empty = new double*[1];
+	calcdata_empty[0] = new double[1];
 	
-	murhot_table = (double*) malloc((pixelmax + 1) * sizeof(double));
+	murhot_table = new double[(pixelmax + 1)];
 	if (!murhot_table)
 	{
 		recordError(errors, "Unable to allocate memory for murhot_table.\n");
 		return calcdata_empty;
 	}
-	calcdata = (double**) malloc(nrows * sizeof(double*));
+	calcdata = new double*[nrows];
 	if (!calcdata)
 	{
 		recordError(errors, "Unable to allocate memory for calcdata.\n");
-		free(murhot_table);
+		delete[] murhot_table;
 		return calcdata_empty;
 	}
 	for (i = 0; i < nrows; i++) 
 	{
-		calcdata[i] = (double*) malloc(ncols * sizeof(double));
+		calcdata[i] = new double[ncols];
 		if (!calcdata[i])
 		{
 			recordError(errors, "Unable to allocate enough memory for calcdata\n");
-			freeCalcdata(calcdata, i);
-			free(murhot_table);
+			freeJaggedArray(calcdata, i);
+			delete[] murhot_table;
 			return calcdata_empty;
 		}
 	}
@@ -70,7 +70,7 @@ double** calculateMurhot(uint16_t** pixeldata, struct TiffMetadata* meta, struct
 	// Memory release
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	free(murhot_table);
-	freeCalcdata(calcdata_empty, 1);
+	delete[] murhot_table;
+	freeJaggedArray(calcdata_empty, 1);
 	return calcdata;
 }
