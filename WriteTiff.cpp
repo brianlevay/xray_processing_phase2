@@ -4,7 +4,7 @@
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-void writeTiff(std::vector<uint16_t> pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors)
+void writeTiff(std::vector<uint16_t> &pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors)
 {
 	int status, ret;
 	uint32_t i, j, k, nrows, ncols;

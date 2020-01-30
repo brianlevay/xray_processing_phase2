@@ -1,19 +1,21 @@
+#include <iostream>
+#include <vector>
 #include <cstdlib>
 #include <cstdint>
 #include <math.h>
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors)
+void createContrastOutput(std::vector<double> &calcdata, std::vector<uint16_t> &pixeldata, struct TiffMetadata* meta, struct Errors* errors)
 {
 	uint16_t pixelmax, maxuint16;
-	uint32_t i, j, k, nrows, ncols;
+	uint32_t i, j, k, k_tbl, nrows, ncols;
 	double stretch_p, maxuint16_dbl;
 	double calc_lower, calc_upper;
 	double Lstep, Ltable, stretch_table_m;
-	double table_index_m, k_dbl;
-	double* data_limits;
-	uint16_t* stretch_table;
+	double table_index_m, k_tbl_dbl;
+	std::vector<double> data_limits;
+	std::vector<uint16_t> stretch_table;
 	
 	nrows = (*meta).nrows;
 	ncols = (*meta).ncols;
@@ -22,32 +24,20 @@ void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMe
 	maxuint16 = MAX_UINT16;
 	maxuint16_dbl = (double) maxuint16;
 	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// External function calls 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	data_limits = calculatePixelLimits(pixeldata, meta, errors);
 	if ((*errors).iserror == 1)
 	{
-		delete[] data_limits;
 		return;
 	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Memory allocation and error handling 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	stretch_table = new uint16_t[(maxuint16 + 1)];
-	if (!stretch_table)
+	try
+	{
+		stretch_table.resize(maxuint16 + 1);
+	}
+	catch (int e)
 	{
 		recordError(errors, "Unable to allocate memory for stretch_table.\n");
-		delete[] data_limits;
 		return;
 	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Calculations
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	calc_lower = -log(data_limits[1] / (double)pixelmax);
 	calc_upper = -log(data_limits[0] / (double)pixelmax);
@@ -65,25 +55,20 @@ void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMe
 	{
 		for (j = 0; j < ncols; j++)
 		{
-			k_dbl = table_index_m * (calcdata[i][j] - calc_lower);
-			if (k_dbl < 0.0)
+			k = i * ncols + j;
+			k_tbl_dbl = table_index_m * (calcdata[k] - calc_lower);
+			if (k_tbl_dbl < 0.0)
 			{
-				k_dbl = 0;
+				k_tbl_dbl = 0;
 			}
-			if (k_dbl > maxuint16_dbl)
+			if (k_tbl_dbl > maxuint16_dbl)
 			{
-				k_dbl = maxuint16_dbl;
+				k_tbl_dbl = maxuint16_dbl;
 			}
-			k = (uint16_t) k_dbl;
-			pixeldata[i][j] = stretch_table[k];		
+			k_tbl = (uint16_t)k_tbl_dbl;
+			pixeldata[k] = stretch_table[k_tbl];
 		}
 	}
 	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Memory release
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	delete[] data_limits;
-	delete[] stretch_table;
 	return;
 }

@@ -43,18 +43,15 @@ struct TiffMetadata
 
 void recordError(struct Errors* errors, const char* message);
 
-void freeJaggedArray(uint16_t** data, uint32_t nrows);
-
-void freeJaggedArray(double** data, uint32_t nrows);
-
 std::vector<uint16_t> readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors* errors);
 
-void writeTiff(std::vector<uint16_t> pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors);
+std::vector<double> calculateMurhot(std::vector<uint16_t> &pixeldata, struct TiffMetadata* meta, struct Errors* errors);
 
-double** calculateMurhot(uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors);
+void createContrastOutput(std::vector<double> &calcdata, std::vector<uint16_t> &pixeldata, struct TiffMetadata* meta, struct Errors* errors);
 
-double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors);
+std::vector<double> calculatePixelLimits(std::vector<uint16_t> &pixeldata, struct TiffMetadata* meta, struct Errors* errors);
 
-void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors);
+void writeTiff(std::vector<uint16_t> &pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors);
+
 
 #endif

@@ -1,76 +1,52 @@
+#include <vector>
 #include <cstdlib>
 #include <cstdint>
 #include <math.h>
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-double** calculateMurhot(uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors)
+std::vector<double> calculateMurhot(std::vector<uint16_t> &pixeldata, struct TiffMetadata* meta, struct Errors* errors)
 {
 	uint16_t pixelmax;
-	uint32_t i, j, Itable, nrows, ncols;
-	double* murhot_table;
-	double** calcdata_empty;
-	double** calcdata;
+	uint32_t i, j, k, Itable, nrows, ncols;
+	std::vector<double> calcdata;
+	std::vector<double> murhot_table;
 	
 	nrows = (*meta).nrows;
 	ncols = (*meta).ncols;
 	pixelmax = (*meta).pixelmax;
 	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Memory allocation and error handling 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	calcdata_empty = new double*[1];
-	calcdata_empty[0] = new double[1];
-	
-	murhot_table = new double[(pixelmax + 1)];
-	if (!murhot_table)
+	try
 	{
-		recordError(errors, "Unable to allocate memory for murhot_table.\n");
-		return calcdata_empty;
+		calcdata.resize(nrows * ncols);
 	}
-	calcdata = new double*[nrows];
-	if (!calcdata)
+	catch (int e)
 	{
-		recordError(errors, "Unable to allocate memory for calcdata.\n");
-		delete[] murhot_table;
-		return calcdata_empty;
+		recordError(errors, "Unable to allocate enough memory for the image array\n");
+		return calcdata;
 	}
-	for (i = 0; i < nrows; i++) 
+	try
 	{
-		calcdata[i] = new double[ncols];
-		if (!calcdata[i])
-		{
-			recordError(errors, "Unable to allocate enough memory for calcdata\n");
-			freeJaggedArray(calcdata, i);
-			delete[] murhot_table;
-			return calcdata_empty;
-		}
+		murhot_table.resize(pixelmax + 1);
 	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Calculations
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	catch (int e)
+	{
+		recordError(errors, "Unable to allocate enough memory for the lookup table\n");
+		return calcdata;
+	}
 	
 	murhot_table[0] = -log((double)1 / (double)pixelmax);
 	for (Itable = 1; Itable <= pixelmax; Itable++)
 	{
 		murhot_table[Itable] = -log((double)Itable / (double)pixelmax);
 	}
-	
 	for (i = 0; i < nrows; i++)
 	{
 		for (j = 0; j < ncols; j++)
 		{
-			calcdata[i][j] = murhot_table[pixeldata[i][j]];
+			k = i * ncols + j;
+			calcdata[k] = murhot_table[pixeldata[k]];
 		}
 	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Memory release
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	delete[] murhot_table;
-	freeJaggedArray(calcdata_empty, 1);
 	return calcdata;
 }

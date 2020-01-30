@@ -1,16 +1,17 @@
+#include <vector>
 #include <cstdlib>
 #include <cstdint>
 #include <math.h>
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors)
+std::vector<double> calculatePixelLimits(std::vector<uint16_t> &pixeldata, struct TiffMetadata* meta, struct Errors* errors)
 {
 	uint16_t lower_offset_I, nshift;
-	uint32_t i, j, n, nrows, ncols, nbins, bin_step;
+	uint32_t i, j, k, n, nrows, ncols, nbins, bin_step;
 	double cumulative, cumulative_min, freq_min;
-	double* hist_freq;
-	double* data_limits;
+	std::vector<double> data_limits;
+	std::vector<double> hist_freq;
 	
 	nrows = (*meta).nrows;
 	ncols = (*meta).ncols;
@@ -20,28 +21,23 @@ double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, st
 	lower_offset_I = LOWER_OFFSET_I;
 	freq_min = FREQ_MIN;
 	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Memory allocation and error handling 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	data_limits = new double[2];
-	
-	hist_freq = new double[nbins]();
-	if (!hist_freq)
+	data_limits.resize(2);
+	try
+	{
+		hist_freq.resize(nbins);
+	}
+	catch (int e)
 	{
 		recordError(errors, "Unable to allocate memory for hist_freq.\n");
 		return data_limits;
 	}
 	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Calculations
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	for (i = 0; i < nrows; i++)
 	{
 		for (j = 0; j < ncols; j++)
 		{
-			nshift = pixeldata[i][j] >> 8;
+			k = i * ncols + j;
+			nshift = pixeldata[k] >> 8;
 			hist_freq[nshift] = hist_freq[nshift] + 1.0;
 		}
 	}
@@ -77,10 +73,5 @@ double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, st
 		data_limits[0] = 0.0;
 	}
 	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Memory release
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	delete[] hist_freq;
 	return data_limits;
 }
