@@ -1,7 +1,5 @@
-// XRayProcessing_Phase2.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <vector>
 #include <cstdio>
 #include <ctime>
 #include "XRayProcessing.hpp"
@@ -19,28 +17,26 @@ int main(int argc, char* argv[])
 
 	struct Errors errors = { 0, "none" };
 	struct TiffMetadata meta = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	uint16_t** pixeldata;
-	double** calcdata;
-
+	
 	clock_t start, finish;
 	start = clock();
-
-	pixeldata = readTiff(inpath, &meta, &errors);
+	
+	std::vector<uint16_t> pixeldata = readTiff(inpath, &meta, &errors);
 	if (errors.iserror == 1)
 	{
 		std::cout << errors.error;
-		freeJaggedArray(pixeldata, 1);
 		return 0;
 	}
 
-	calcdata = calculateMurhot(pixeldata, &meta, &errors);
-	if (errors.iserror == 1)
-	{
-		std::cout << errors.error;
-		freeJaggedArray(calcdata, 1);
-		freeJaggedArray(pixeldata, meta.nrows);
-		return 0;
-	}
+	//double** calcdata;
+	//calcdata = calculateMurhot(pixeldata, &meta, &errors);
+	//if (errors.iserror == 1)
+	//{
+	//	std::cout << errors.error;
+	//	freeJaggedArray(calcdata, 1);
+	//	freeJaggedArray(pixeldata, meta.nrows);
+	//	return 0;
+	//}
 
 	/////////////////////////////////////////////////////////////////
 	// This is where the magic needs to happen!
@@ -55,24 +51,24 @@ int main(int argc, char* argv[])
 	//	return 0;
 	//}
 
-	createContrastOutput(calcdata, pixeldata, &meta, &errors);
-	if (errors.iserror == 1)
-	{
-		std::cout << errors.error;
-		freeJaggedArray(calcdata, meta.nrows);
-		freeJaggedArray(pixeldata, meta.nrows);
-		return 0;
-	}
+	//createContrastOutput(calcdata, pixeldata, &meta, &errors);
+	//if (errors.iserror == 1)
+	//{
+	//	std::cout << errors.error;
+	//	freeJaggedArray(calcdata, meta.nrows);
+	//	freeJaggedArray(pixeldata, meta.nrows);
+	//	return 0;
+	//}
 
 	writeTiff(pixeldata, outpath, &meta, &errors);
 
-	freeJaggedArray(calcdata, meta.nrows);
-	freeJaggedArray(pixeldata, meta.nrows);
-	if (errors.iserror == 1)
-	{
-		std::cout << errors.error;
-		return 0;
-	}
+	//freeJaggedArray(calcdata, meta.nrows);
+	//freeJaggedArray(pixeldata, meta.nrows);
+	//if (errors.iserror == 1)
+	//{
+	//	std::cout << errors.error;
+	//	return 0;
+	//}
 
 	finish = clock();
     std::cout << "Elapsed time: " << (finish - start) << " ms\n";

@@ -1,24 +1,22 @@
+#include <vector>
+#include <algorithm>
 #include <cstdlib>
 #include <cstdint>
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors* errors)
+std::vector<uint16_t> readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors* errors)
 {
-	uint16_t pixelmax;
-	uint32_t i, j, nrows, ncols;
 	int status;
-	uint16_t** pixeldata_empty;
-	uint16_t** pixeldata;
-	
-	pixeldata_empty = new uint16_t*[1];
-	pixeldata_empty[0] = new uint16_t[1];
+	uint16_t pixelmax;
+	uint32_t i, j, k, nrows, ncols;
+	std::vector<uint16_t> pixeldata;
 	
 	TIFF* tif_in = TIFFOpen(inpath,"r");
 	if (!tif_in) 
 	{
 		recordError(errors, "Unable to open tif file.\n");
-		return pixeldata_empty;
+		return pixeldata;
 	}
 	
 	TIFFGetFieldDefaulted(tif_in, TIFFTAG_IMAGEWIDTH, &(*meta).ncols);
@@ -35,48 +33,42 @@ uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors
 	{
 		recordError(errors, "Image does not meet expectations for this code. Images must be contiguous 16-bit greyscale.\n");
 		TIFFClose(tif_in);
-		return pixeldata_empty;
+		return pixeldata;
 	}
 	
 	nrows = (*meta).nrows;
 	ncols = (*meta).ncols;
-	pixeldata = new uint16_t*[nrows];
-	if (!pixeldata)
+	try
+	{
+		pixeldata.resize(nrows * ncols);
+	}
+	catch (int e)
 	{
 		recordError(errors, "Unable to allocate enough memory for the image array\n");
 		TIFFClose(tif_in);
-		return pixeldata_empty;
+		return pixeldata;
 	}
 	
 	pixelmax = 0;
 	for (i = 0; i < nrows; i++) 
 	{
-		pixeldata[i] = new uint16_t[ncols];
-		if (!pixeldata[i])
-		{
-			recordError(errors, "Unable to allocate enough memory for the image array\n");
-			TIFFClose(tif_in);
-			freeJaggedArray(pixeldata, i);
-			return pixeldata_empty;
-		}
-		status = TIFFReadScanline(tif_in, pixeldata[i], i, 0);
+		k = i * ncols;
+		status = TIFFReadScanline(tif_in, &pixeldata[k], i, 0);
 		if (status == -1)
 		{
 			recordError(errors, "Unable to read data from image array\n");
 			TIFFClose(tif_in);
-			freeJaggedArray(pixeldata, i);
-			return pixeldata_empty;
+			return pixeldata;
 		}
 		for (j = 0; j < ncols; j++)
 		{
-			if (pixeldata[i][j] > pixelmax)
+			if (pixeldata[k + j] > pixelmax)
 			{
-				pixelmax = pixeldata[i][j];
+				pixelmax = pixeldata[k + j];
 			}
 		}
 	}
 	(*meta).pixelmax = pixelmax;
 	TIFFClose(tif_in);
-	freeJaggedArray(pixeldata_empty, 1);
 	return pixeldata;
 }

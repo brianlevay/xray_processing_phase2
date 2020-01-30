@@ -1,3 +1,4 @@
+#include <vector>
 #include <cstdint>
 #include "libtiff/tiffio.h"
 
@@ -40,20 +41,20 @@ struct TiffMetadata
 /// Function declarations
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void freeJaggedArray(uint16_t** pixeldata, uint32_t nrows);
-
-void freeJaggedArray(double** calcdata, uint32_t nrows);
-
 void recordError(struct Errors* errors, const char* message);
 
-uint16_t** readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors* errors);
+void freeJaggedArray(uint16_t** data, uint32_t nrows);
+
+void freeJaggedArray(double** data, uint32_t nrows);
+
+std::vector<uint16_t> readTiff(const char* inpath, struct TiffMetadata* meta, struct Errors* errors);
+
+void writeTiff(std::vector<uint16_t> pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors);
 
 double** calculateMurhot(uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors);
 
 double* calculatePixelLimits(uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors);
 
 void createContrastOutput(double** calcdata, uint16_t** pixeldata, struct TiffMetadata* meta, struct Errors* errors);
-
-void writeTiff(uint16_t** pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors);
 
 #endif

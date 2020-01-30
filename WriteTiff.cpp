@@ -1,12 +1,13 @@
+#include <vector>
 #include <cstdlib>
 #include <cstdint>
 #include "XRayProcessing.hpp"
 #include "libtiff/tiffio.h"
 
-void writeTiff(uint16_t** pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors)
+void writeTiff(std::vector<uint16_t> pixeldata, const char* outpath, struct TiffMetadata* meta, struct Errors* errors)
 {
-	uint32_t i, nrows;
 	int status, ret;
+	uint32_t i, j, k, nrows, ncols;
 	
 	TIFF* tif_out = TIFFOpen(outpath, "w");
 	if (!tif_out) 
@@ -25,8 +26,11 @@ void writeTiff(uint16_t** pixeldata, const char* outpath, struct TiffMetadata* m
 	TIFFSetField(tif_out, TIFFTAG_COMPRESSION, (*meta).compression);
 	
 	nrows = (*meta).nrows;
+	ncols = (*meta).ncols;
+
 	for (i = 0; i < nrows; i++) {
-		status = TIFFWriteScanline(tif_out, pixeldata[i], i, 0);
+		k = i * ncols;
+		status = TIFFWriteScanline(tif_out, &pixeldata[k], i, 0);
 		if (status == -1)
 		{
 			recordError(errors, "Unable to write to tif file.\n");
